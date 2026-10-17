@@ -1,0 +1,135 @@
+/* 2026-10-12 Product Design 改动逻辑：通过 ego 读取 vinaai.tv 全能创作输入栏的实际尺寸与状态。
+ * 加号 36×36、底色 #080D12、描边 #2B3642、绿色图标 16×16；发送 40×40、圆角 24、向上箭头 24×24。
+ * 发送可用色 #B8F84A；禁用色 rgba(55,64,79,.9)，图标 #080D12；悬停沿用参考页原色。
+ * 按钮行垂直居中，底部内边距 12px；加号比发送小 4px，因此底部额外留 2px。
+ * 图标直接复用 ego 读取到的参考页 SVG 图片资源；按钮 DOM、上传事件、发送事件和停止回复控件保持原有行为。
+ * 同时覆盖故事板与画布，排除角色资产专用画布。空输入仅同步置灰视觉，不把按钮禁用状态用于阻断确认卡或快捷提示词。
+ */
+body:not(:has(#character-asset-canvas-theme)) .chat .composer {
+  padding: 0 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat .composer-actions {
+  align-items: center !important;
+  padding: 12px !important;
+  border-top: 0 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat .canvas-chat-upload {
+  box-sizing: border-box;
+  display: grid !important;
+  place-items: center;
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  flex: 0 0 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 1px solid #2b3642 !important;
+  border-radius: 999px !important;
+  background: #080d12 !important;
+  color: #b8f84a !important;
+  box-shadow: none !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat .canvas-chat-upload > svg {
+  display: none !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat .canvas-chat-upload::after {
+  content: '';
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3e%3cpath%20d='M15.333%207.333H8.667V.667a.667.667%200%200%200-1.334%200v6.666H.667a.667.667%200%200%200%200%201.334h6.666v6.666a.667.667%200%200%200%201.334%200V8.667h6.666a.667.667%200%200%200%200-1.334Z'%20fill='%23B8F84A'/%3e%3c/svg%3e") center / contain no-repeat;
+  pointer-events: none;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat #sendBtn {
+  box-sizing: border-box;
+  display: grid !important;
+  place-items: center;
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  flex: 0 0 40px !important;
+  padding: 8px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+/* 停止回复继续显示既有方形图标，不由向上箭头覆盖。 */
+body:not(:has(#character-asset-canvas-theme)) .chat #sendBtn:not(.vina-reply-stop):not([data-reply-action="stop"]) {
+  background: #b8f84a !important;
+  color: #080d12 !important;
+  cursor: pointer;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat #sendBtn:not(.vina-reply-stop):not([data-reply-action="stop"]) > :is(svg, i) {
+  display: none !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat #sendBtn:not(.vina-reply-stop):not([data-reply-action="stop"])::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3e%3cpath%20d='m17.71%209.88-4.3-4.29a2%202%200%200%200-2.82%200L6.29%209.88a1%201%200%200%200%201.42%201.41L11%208v11a1%201%200%201%200%202%200V8l3.29%203.29a1%201%200%201%200%201.42-1.41Z'%20fill='%23080D12'/%3e%3c/svg%3e") center / contain no-repeat;
+  pointer-events: none;
+}
+body:not(:has(#character-asset-canvas-theme)) .chat #sendBtn:disabled:not(.vina-reply-stop):not([data-reply-action="stop"]) {
+  background: rgba(55, 64, 79, .9) !important;
+  color: #080d12 !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+/* 无文字且无附件/节点引用时呈现参考页的置灰状态；有引用时仍允许原有发送路径使用素材。 */
+body:not(:has(#character-asset-canvas-theme)) .chat .composer:has(#prompt:placeholder-shown):not(.has-chat-images):not(:has(.selected-node-tray.active)):not(:has(.canvas-chat-image-card)) #sendBtn:not(.vina-reply-stop):not([data-reply-action="stop"]) {
+  background: rgba(55, 64, 79, .9) !important;
+  color: #080d12 !important;
+}
+
+/* 2026-10-14 Product Design 改动逻辑：全能创作项目（故事板/画布）的生成模式
+   菜单同步首页参考配色与原始自动生成图标。菜单移到 body 后也适用这些规则；
+   不设置定位属性，保留 JS 向上展开与视口边缘避让，角色资产专用画布除外。 */
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu {
+  background: #181e27 !important;
+  border-color: #2d3641 !important;
+  color: #d6dbe3 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu .auto-mode-option:is(:hover, :focus-visible, .selected) {
+  background: #090d11 !important;
+  color: #fff !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu .auto-mode-desc {
+  color: #9aa6b2 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu .auto-mode-check {
+  color: #c6f661 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu .auto-mode-option:focus-visible {
+  outline: 1px solid #c6f661;
+  outline-offset: -1px;
+}
+/* 原始图标为填充路径，取消通用线形图标描边，避免轮廓变粗或内部糊成一块。 */
+body:not(:has(#character-asset-canvas-theme)) :is(.auto-mode-trigger, .auto-mode-menu) svg.canvas-generation-auto-icon {
+  fill: currentColor !important;
+  stroke: none !important;
+  overflow: hidden;
+}
+
+/* 2026-10-14 Product Design 改动逻辑：全能创作生成模式使用精简译文，副标题最多两行；
+   收缩中间文字列并覆盖旧 nowrap，以两行高度兜底，图标与勾选保留独立列。 */
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-option > span {
+  min-width: 0 !important;
+}
+body:not(:has(#character-asset-canvas-theme)) .auto-mode-menu .auto-mode-desc {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-height: 1.25 !important;
+  max-height: 2.5em !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}

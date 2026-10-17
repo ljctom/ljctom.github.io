@@ -1,0 +1,57 @@
+/* 2026-10-11 Product Design 改动逻辑：直接采用 Figma Toast 1621:6050 的背景、内描边、圆角、阴影、14/20/500 字体及原始状态图标；整个应用共用固定提示层，顶部定位 25vh 对应用户红框，业务提示的持续时间仍由原入口控制。 */
+#vinaToastLayer.vina-toast-layer {
+  position: fixed !important;
+  top: 25vh !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(678px, calc(100vw - 32px));
+  transform: translateX(-50%) !important;
+  pointer-events: none !important;
+}
+#vinaToastLayer:empty { display: none !important; }
+#vinaToastLayer .vina-figma-toast {
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: max-content;
+  max-width: 100%;
+  min-height: 52px;
+  padding: 16px 24px;
+  border: 0;
+  border-radius: 16px;
+  background: #171e27;
+  color: #fff;
+  /* Figma 的 1px 描边位于框内，不额外增加 52px 单行高度。 */
+  box-shadow: inset 0 0 0 1px #2b3642, 0 0 80px #000;
+  font-family: Inter, "Noto Sans SC", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: left;
+  pointer-events: none;
+  animation: vina-figma-toast-in 160ms ease-out both;
+}
+#vinaToastLayer .vina-figma-toast-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+}
+#vinaToastLayer .vina-figma-toast-icon img { display: block; width: 16px; height: 16px; }
+#vinaToastLayer .vina-figma-toast-message {
+  min-width: 0;
+  max-width: 600px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@keyframes vina-figma-toast-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { #vinaToastLayer .vina-figma-toast { animation: none; } }

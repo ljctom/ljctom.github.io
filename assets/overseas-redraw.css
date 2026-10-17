@@ -1,0 +1,110 @@
+/* 2026-09-14 改动逻辑：沿用首页深色与青柠色，参考上传示例采用宽幅弹窗、圆角虚线区域和居中上传入口；窄屏自动换行并限制弹窗高度。 */
+.overseas-redraw-dialog { width:min(1040px,calc(100vw - 40px)); max-height:85vh; box-sizing:border-box; padding:28px; border:1px solid #34404c; border-radius:24px; background:#111920; color:#f4f6f8; box-shadow:0 32px 100px #0009; overflow:auto; }
+.overseas-redraw-dialog::backdrop { background:#020609b3; backdrop-filter:blur(5px); }
+.overseas-redraw-head { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:24px; }
+.overseas-redraw-head h2 { display:flex; align-items:center; gap:10px; margin:0; font-size:22px; }
+.overseas-redraw-head h2 span { padding:3px 6px; border-radius:5px; background:#b8f84a; color:#111920; font-size:11px; letter-spacing:.5px; }
+.overseas-redraw-head button { width:36px; height:36px; border:0; border-radius:50%; background:#ffffff0a; color:#aeb7c0; font-size:26px; cursor:pointer; }
+.overseas-redraw-dropzone { min-height:300px; padding:40px 24px; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px dashed #49545e; border-radius:20px; background:#0d141b; text-align:center; cursor:pointer; transition:border-color .15s,background .15s; }
+.overseas-redraw-dropzone:hover,.overseas-redraw-dropzone.is-dragging { border-color:#b8f84a; background:#b8f84a08; }
+.overseas-redraw-upload { display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border:0; border-radius:30px; background:#b8f84a; color:#17200d; font:inherit; font-weight:600; cursor:pointer; margin-bottom:22px; }
+.overseas-redraw-upload span { font-size:23px; line-height:1; }
+.overseas-redraw-dropzone p { margin:4px 0; color:#a6afb8; font-size:15px; line-height:1.8; }
+.overseas-redraw-dropzone .overseas-redraw-limits { font-size:13px; color:#77838e; }
+.overseas-redraw-status { margin:14px 0 0; color:#aeb7c0; font-size:13px; white-space:pre-line; }
+.overseas-redraw-status:empty,.overseas-redraw-files:empty { display:none; }
+.overseas-redraw-files { display:grid; gap:8px; margin:16px 0 0; padding:0; list-style:none; }
+.overseas-redraw-files li { display:flex; align-items:center; gap:12px; padding:12px 14px; border:1px solid #2e3943; border-radius:10px; font-size:14px; }
+.overseas-redraw-files li span { flex:1; min-width:0; overflow-wrap:anywhere; }
+.overseas-redraw-files small { color:#8c99a4; white-space:nowrap; }
+.overseas-redraw-files button { border:0; background:transparent; color:#aeb7c0; cursor:pointer; }
+.overseas-redraw-dialog button:focus-visible { outline:2px solid #b8f84a; outline-offset:4px; }
+@media(max-width:600px) { .overseas-redraw-dialog { padding:20px; width:calc(100vw - 24px); } .overseas-redraw-dropzone { min-height:280px; padding:24px 16px; } .overseas-redraw-files li { flex-wrap:wrap; } }
+/* 2026-09-14 改动逻辑：工作流隔离实例覆盖父页面，隐藏后父页面仍保留原短剧状态；首步继承黑色工作流视觉，两列原片卡片与悬浮操作条适配小屏。 */
+.redraw-workflow-frame { position:fixed; inset:0; z-index:10000; width:100%; height:100%; border:0; background:#090b0e; }
+.redraw-workflow-frame[hidden] { display:none; }
+/* 2026-09-26 Product Design 改动逻辑：转绘 iframe 始终采用短剧工作区的全屏结构，去掉首页顶栏、账户内容与左侧主导航；脚本未完成时也为三步进度条保留顶部空间。 */
+html.redraw-embedded .home-promo-banner,
+html.redraw-embedded .global-account,
+html.redraw-embedded .sidebar,
+html.redraw-embedded .app::before { display:none !important; }
+html.redraw-embedded main { margin-left:0 !important; padding-top:0 !important; }
+html.redraw-embedded .redraw-original-workspace .script-status { position:sticky; top:0; z-index:10; }
+html.redraw-embedded .redraw-original-workspace .steps { transform:translate(0,-50%); }
+/* 2026-09-26 Product Design 改动逻辑：转绘子页加载主脚本期间先展示“上传原片”，只隐藏其他工作区与侧栏；初始化延迟或中断时不再留下整页空白。 */
+html.redraw-embedded:not(.redraw-ready) .sidebar,
+html.redraw-embedded:not(.redraw-ready) .view:not(.redraw-original-workspace) { display:none !important; }
+html.redraw-embedded:not(.redraw-ready) .redraw-original-workspace[hidden] { display:block !important; }
+html.redraw-embedded:not(.redraw-ready) main { margin-left:0; }
+.redraw-original-workspace[hidden] { display:none !important; }
+.redraw-original-workspace { min-height:100vh; background:radial-gradient(ellipse at 80% 5%,#26134030,transparent 55%),#090b0e; }
+.redraw-original-main { max-width:1600px; margin:auto; padding:44px 48px 160px; }
+.redraw-original-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding-bottom:22px; margin-bottom:28px; border-bottom:1px solid #ffffff12; }
+/* 2026-09-14 修正逻辑：覆盖全局 h1 居中规则，让上传原片标题与说明、卡片左边缘对齐。 */
+.redraw-original-heading h1 { text-align:left; font-size:36px; margin:0 0 12px; color:#f5f5f7; }
+.redraw-original-heading p { margin:8px 0 0; color:#8c8e95; line-height:1.6; font-size:14px; }
+.redraw-original-heading button { flex-shrink:0; border:1px solid #ffffff18; background:#ffffff0c; color:#e4e4e8; padding:11px 20px; border-radius:24px; font:inherit; cursor:pointer; }
+.redraw-original-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+.redraw-original-card { display:flex; align-items:center; padding:14px 18px 14px 8px; gap:16px; border:1px solid #ffffff20; border-radius:22px; background:linear-gradient(120deg,#242628,#191a1d); min-width:0; }
+.redraw-drag-handle { color:#777981; cursor:grab; font-size:22px; width:14px; flex-shrink:0; }
+.redraw-source-cover { width:132px; aspect-ratio:3/4; flex-shrink:0; position:relative; border-radius:15px; box-shadow:inset 0 0 0 1px #ffffff16; }
+.redraw-source-cover span { position:absolute; bottom:12px; left:12px; font-size:14px; font-weight:600; color:#fff; }
+.redraw-source-info { min-width:0; flex:1; }
+.redraw-source-title { display:flex; align-items:center; gap:10px; }
+.redraw-source-title input { width:100%; min-width:0; padding:5px 0; border:1px solid transparent; background:transparent; color:#f4f4f6; font-family:inherit; font-size:18px; font-weight:600; text-overflow:ellipsis; }
+.redraw-source-title input:hover,.redraw-source-title input:focus { border-color:#ffffff30; border-radius:5px; }
+.redraw-source-title > span { white-space:nowrap; color:#a7a7af; padding:3px 8px; border-radius:14px; background:#ffffff0b; font-size:12px; }
+.redraw-source-info p { color:#93949d; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin:12px 0 26px; }
+.redraw-source-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.redraw-source-actions button { padding:5px 0; background:transparent; border:0; color:#e8e8ec; font:inherit; font-size:13px; cursor:pointer; }
+.redraw-source-actions .redraw-source-delete { color:#fb686e; }
+.redraw-source-actions button:disabled { opacity:.25; cursor:default; }
+[data-redraw-notice] { color:#edb878; font-size:13px; }
+.redraw-original-footer { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:200; display:flex; align-items:center; gap:14px; padding:14px 16px; width:max-content; max-width:calc(100vw - 48px); box-sizing:border-box; border:1px solid #ffffff24; border-radius:40px; background:#202124f5; box-shadow:0 16px 60px #0008; }
+.redraw-footer-spark { background:#cfc1ff; color:#201934; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; flex-shrink:0; }
+.redraw-footer-copy { color:#d3d3db; font-size:13px; }
+.redraw-setting { position:relative; }
+.redraw-setting > button { background:#ffffff08; border:1px solid #ffffff1f; color:#dddfe6; padding:10px 14px; border-radius:22px; white-space:nowrap; cursor:pointer; font:inherit; font-size:13px; }
+.redraw-confirm { border:0; background:#f7f7f9; color:#18191e; border-radius:28px; padding:12px 18px; white-space:nowrap; font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.redraw-confirm > span { color:#9272e8; font-weight:500; }
+.redraw-confirm:disabled { opacity:.4; cursor:not-allowed; }
+/* 2026-09-26 Product Design 改动逻辑：缺失目标国家的提示固定在底部操作条上方，沿用转绘暗色视觉，避免盖住下一步按钮。 */
+.redraw-validation-toast { position:fixed; left:50%; bottom:106px; z-index:210; width:max-content; max-width:calc(100vw - 32px); box-sizing:border-box; padding:10px 16px; border:1px solid #ffffff24; border-radius:10px; background:#30313a; color:#f5f3f8; box-shadow:0 12px 32px #0009; font-size:13px; line-height:1.5; text-align:center; transform:translateX(-50%); pointer-events:none; }
+.redraw-validation-toast[hidden] { display:none; }
+.redraw-setting-panel { position:absolute; bottom:calc(100% + 20px); right:0; padding:22px; background:#272a41; border:1px solid #ffffff20; border-radius:20px; box-shadow:0 20px 60px #0009; max-height:min(570px,65vh); overflow:auto; }
+.redraw-setting-panel[hidden] { display:none; }
+.redraw-setting-panel h3 { margin:0 0 18px; font-size:20px; color:#f4f4f8; }
+/* 2026-09-30 Product Design 改动逻辑：转绘风格弹窗与剧本创作共用深灰背景、三栏分类和真实图片卡片；
+   弹窗向上展开，标题与分类固定，仅列表滚动；卡片沿用 home-drama-style-card 的自然行高和选中态。 */
+.redraw-style-panel { display:flex; flex-direction:column; box-sizing:border-box; width:760px; max-width:calc(100vw - 32px); padding:0; border-radius:16px; border-color:rgba(255,255,255,.14); background:#202020; overflow:hidden; color:#fff; }
+.redraw-style-panel .style-popover-title { flex:0 0 auto; padding:16px 18px 12px; font-size:16px; }
+.redraw-style-panel .redraw-style-tabs { flex:0 0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:0; margin:0 16px 14px; background:#181818; border-radius:8px; }
+.redraw-style-panel .style-category { border:0; border-radius:7px; height:34px; background:transparent; }
+.redraw-style-panel .style-category.is-active { background:#393939; color:#fff; }
+.redraw-style-panel .redraw-style-grid { min-height:0; max-height:none; flex:1 1 auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); grid-auto-rows:max-content; align-content:start; align-items:stretch; gap:10px; margin:0; padding:2px 16px 16px; background:transparent; border-radius:0; overflow-y:auto; overscroll-behavior:contain; }
+/* 2026-09-14 修正逻辑：地区面板为四字国家名预留单行宽度，勾选标记绝对定位，避免隐藏勾选仍占据空间把澳大利亚挤成两行。 */
+.redraw-region-panel { width:280px; box-sizing:border-box; background:#22252f; }
+[data-redraw-regions] { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+[data-redraw-regions] button { position:relative; display:block; text-align:left; white-space:nowrap; min-height:42px; font-size:14px; line-height:20px; background:#ffffff05; border:1px solid #ffffff12; border-radius:8px; padding:10px 24px 10px 10px; color:#d4d5df; cursor:pointer; }
+[data-redraw-regions] button span { position:absolute; right:8px; top:50%; transform:translateY(-50%); visibility:hidden; }
+[data-redraw-regions] button[aria-pressed=true] { border-color:#b9a3f4; color:#d9c9ff; }
+[data-redraw-regions] button[aria-pressed=true] span { visibility:visible; }
+.redraw-exit-fixed { position:fixed; right:22px; bottom:20px; z-index:500; border:1px solid #ffffff25; background:#202126; border-radius:20px; color:#aaaeb8; padding:8px 14px; cursor:pointer; }
+.redraw-original-workspace:not([hidden]) ~ .redraw-exit-fixed { display:none; }
+.redraw-original-workspace button:focus-visible { outline:2px solid #bba6f5; outline-offset:3px; }
+@media(max-width:1200px) { .redraw-footer-copy { display:none; } .redraw-source-cover { width:104px; } .redraw-original-main { padding:32px 28px 155px; } .redraw-original-card { gap:12px; } }
+@media(max-width:760px) { .redraw-original-grid { grid-template-columns:1fr; } .redraw-original-heading { flex-wrap:wrap; } .redraw-original-heading h1 { font-size:28px; } .redraw-original-footer { flex-wrap:wrap; justify-content:center; width:calc(100vw - 24px); max-width:none; border-radius:24px; bottom:12px; gap:8px; } .redraw-original-main { padding:24px 16px 180px; } .redraw-footer-spark { display:none; } .redraw-setting-panel { position:fixed; left:0; right:auto; bottom:calc(100% + 12px); max-width:100%; box-sizing:border-box; } .redraw-style-panel { width:100%; } .redraw-style-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .redraw-exit-fixed { top:80px; bottom:auto; } }
+
+/* 2026-09-14 修正逻辑：底栏以 inset + margin 居中，避免 transform 将向上弹层的 fixed 坐标绑定到底栏；退出入口只在第二、三步出现。 */
+.redraw-original-footer { left:0; right:0; margin-inline:auto; transform:none; }
+body[data-redraw-step="redraw-original"] .redraw-exit-fixed { display:none; }
+
+/* 2026-09-22 改动逻辑：仅调整转绘上传页的返回区；独立圆形箭头右侧展示标题，标题不再属于返回按钮点击区域。 */
+.redraw-back-group { display:flex; align-items:center; gap:16px; }
+/* 2026-09-25 Product Design 改动逻辑：转绘页的独立返回按钮与短剧分镜标题横条等高，桌面端为 40px 圆形。 */
+.redraw-original-workspace .redraw-back-group .script-back { width:40px; min-width:40px; height:40px; min-height:40px; padding:0; border:0; border-radius:50%; justify-content:center; background:#171e29; color:#aeb8c6; }
+.redraw-original-workspace .redraw-back-group .script-back:hover { background:#202938; color:#fff; }
+.redraw-original-workspace .redraw-back-group .script-back svg { width:20px; height:20px; flex:0 0 20px; }
+/* 2026-09-25 改动逻辑：窄屏转绘页返回按钮同样匹配短剧分集标题横条的 38px 高度。 */
+@media(max-width:999.98px){.redraw-original-workspace .redraw-back-group .script-back{width:38px;min-width:38px;height:38px;min-height:38px}}
+.redraw-project-title { color:#d8dde5; font-size:16px; font-weight:760; white-space:nowrap; }
